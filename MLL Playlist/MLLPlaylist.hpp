@@ -10,9 +10,10 @@
 
 using namespace std;
 
-// Node child (2 kompartemen): data musik dan pointer next
+// Node child (2 kompartemen): pointer ke node musik di SLL utama dan pointer next.
+// Data musik TIDAK disalin; child hanya menunjuk ke NodeMusik milik SLL.
 struct NodeChildPlaylist {
-    Musik data;
+    NodeMusik* musik;
     NodeChildPlaylist* next;
 };
 
@@ -46,10 +47,12 @@ void tampilMLLPlaylist(const MLLPlaylist& m);
 // Parent: insert first, dilewati jika judul playlist sudah ada
 bool tambahPlaylist(MLLPlaylist& m, const Playlist& pl);
 
-// Child: insert last, dilewati jika judul musik sudah ada pada playlist tersebut
-bool tambahChildPlaylist(NodeParentPlaylist* p, const Musik& musik);
+// Child: insert last, menyimpan pointer ke node musik SLL;
+// dilewati jika musik tersebut sudah ada pada playlist
+bool tambahChildPlaylist(NodeParentPlaylist* p, NodeMusik* nodeMusik);
 
-// Menambah musik ke playlist bernama judulPlaylist + sinkronisasi ke SLL utama
+// Menambah musik ke playlist bernama judulPlaylist.
+// Musik didaftarkan ke SLL dulu (dilewati jika sudah ada), lalu child menunjuk ke node SLL-nya.
 bool tambahMusikKePlaylist(MLLPlaylist& m, ListMusik& sll,
                            const string& judulPlaylist, const Musik& musik);
 
@@ -60,5 +63,9 @@ bool aksesPlaylist(MLLPlaylist& m, const string& judulPlaylist);
 
 bool hapusMusikPlaylist(NodeParentPlaylist* p, const string& judul);
 bool hapusPlaylist(MLLPlaylist& m, const string& judul);
+
+// Menghapus seluruh child bernama judul di SEMUA playlist.
+// WAJIB dipanggil sebelum musik tersebut dihapus dari SLL (mencegah dangling pointer).
+int hapusReferensiMusik(MLLPlaylist& m, const string& judul);
 
 #endif
