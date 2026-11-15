@@ -26,14 +26,15 @@ void bersihkanMusik(ListMusik& l);      // membebaskan seluruh node
 
 /* ===================== Pencarian & informasi ===================== */
 
-NodeMusik* cariMusik(const ListMusik& l, const string& judul);   // nullptr jika tidak ada
-bool sudahAdaMusik(const ListMusik& l, const string& judul);     // true jika judul sudah terdaftar
-int jumlahMusik(const ListMusik& l);                             // banyak musik pada list
-void tampilMusik(const ListMusik& l);                            // mencetak seluruh musik
+NodeMusik* cariMusik(const ListMusik& l, const string& id);              // by id, nullptr jika tidak ada
+NodeMusik* cariMusikByJudul(const ListMusik& l, const string& judul);    // by judul (kecocokan pertama), nullptr jika tidak ada
+bool sudahAdaMusik(const ListMusik& l, const string& id);                // true jika id sudah terdaftar
+int jumlahMusik(const ListMusik& l);                                     // banyak musik pada list
+void tampilMusik(const ListMusik& l);                                    // mencetak seluruh musik
 
 /*  Penambahan (insert last) */
 
-// Menambah musik di akhir list; dilewati jika judulnya sudah ada (tidak duplikat).
+// Menambah musik di akhir list; dilewati jika id-nya sudah ada (tidak duplikat).
 // Mengembalikan true jika benar-benar ditambahkan, false jika dilewati.
 bool tambahMusik(ListMusik& l, const Musik& m);
 
@@ -42,6 +43,6 @@ bool tambahMusik(ListMusik& l, const Musik& m);
 bool hapusAwalMusik(ListMusik& l, Musik& hasil);                     // delete first
 bool hapusAkhirMusik(ListMusik& l, Musik& hasil);                    // delete last
 bool hapusSetelahMusik(NodeMusik* prev, Musik& hasil);               // delete after prev
-bool hapusMusik(ListMusik& l, const string& judul);                  // hapus berdasarkan judul
+bool hapusMusik(ListMusik& l, const string& id);                     // hapus berdasarkan id
 
 #endif

@@ -37,7 +37,9 @@ void bersihkanMLLPlaylist(MLLPlaylist& m);
 /* ===================== Pencarian & informasi ===================== */
 
 NodeParentPlaylist* cariPlaylist(const MLLPlaylist& m, const string& judul);
-NodeChildPlaylist* cariMusikPlaylist(const NodeParentPlaylist* p, const string& judul);
+NodeChildPlaylist* cariMusikPlaylist(const NodeParentPlaylist* p, const string& id);              // by id
+NodeChildPlaylist* cariMusikPlaylistByJudul(const NodeParentPlaylist* p, const string& judul);    // by judul
+
 // Pencarian tingkat tinggi: user cukup memberi judul playlist dan judul musik
 NodeMusik* cariMusikDiPlaylist(const MLLPlaylist& m, const string& judulPlaylist,
                                const string& judulMusik);
@@ -49,15 +51,16 @@ void tampilMLLPlaylist(const MLLPlaylist& m);
 
 /* ===================== Penambahan & perubahan ===================== */
 
-// Parent: insert first, dilewati jika judul playlist sudah ada
-bool tambahPlaylist(MLLPlaylist& m, const Playlist& pl);
+// Parent: insert first, user cukup memberi judul playlist.
+// deskripsi diisi kosong dan frekuensiAkses diisi 0. Dilewati jika judul sudah ada.
+bool tambahPlaylist(MLLPlaylist& m, const string& judul);
 
 // Child: insert last, menyimpan pointer ke node musik SLL;
-// dilewati jika musik tersebut sudah ada pada playlist
+// dilewati jika musik (berdasarkan id) sudah ada pada playlist
 bool tambahChildPlaylist(NodeParentPlaylist* p, NodeMusik* nodeMusik);
 
 // Menambah musik ke playlist bernama judulPlaylist.
-// Musik didaftarkan ke SLL dulu (dilewati jika sudah ada), lalu child menunjuk ke node SLL-nya.
+// Musik didaftarkan ke SLL dulu (dilewati jika id sudah ada), lalu child menunjuk ke node SLL-nya.
 bool tambahMusikKePlaylist(MLLPlaylist& m, ListMusik& sll,
                            const string& judulPlaylist, const Musik& musik);
 
@@ -66,11 +69,11 @@ bool aksesPlaylist(MLLPlaylist& m, const string& judulPlaylist);
 
 /* ===================== Penghapusan ===================== */
 
-bool hapusMusikPlaylist(NodeParentPlaylist* p, const string& judul);
+bool hapusMusikPlaylist(NodeParentPlaylist* p, const string& id);   // by id
 bool hapusPlaylist(MLLPlaylist& m, const string& judul);
 
-// Menghapus seluruh child bernama judul di SEMUA playlist.
+// Menghapus seluruh child ber-id tertentu di SEMUA playlist.
 // WAJIB dipanggil sebelum musik tersebut dihapus dari SLL (mencegah dangling pointer).
-int hapusReferensiMusik(MLLPlaylist& m, const string& judul);
+int hapusReferensiMusik(MLLPlaylist& m, const string& id);
 
 #endif

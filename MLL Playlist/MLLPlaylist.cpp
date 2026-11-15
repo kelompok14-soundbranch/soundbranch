@@ -60,10 +60,25 @@ NodeParentPlaylist* cariPlaylist(const MLLPlaylist& m, const string& judul) {
 /*
  * cariMusikPlaylist  (penelusuran linear, O(n))
  * I.S. : p sudah ada (tidak nullptr)
- * F.S. : mengembalikan pointer ke child yang musiknya berjudul judul pada p,
+ * F.S. : mengembalikan pointer ke child yang musiknya ber-id id pada p,
  *        atau nullptr jika tidak ditemukan; list child tidak berubah
  */
-NodeChildPlaylist* cariMusikPlaylist(const NodeParentPlaylist* p, const string& judul) {
+NodeChildPlaylist* cariMusikPlaylist(const NodeParentPlaylist* p, const string& id) {
+    NodeChildPlaylist* c = p->firstChild;
+
+    while (c != nullptr && c->musik->data.id != id) {
+        c = c->next;
+    }
+    return c;
+}
+
+/*
+ * cariMusikPlaylistByJudul  (penelusuran linear, O(n))
+ * I.S. : p sudah ada (tidak nullptr)
+ * F.S. : mengembalikan pointer ke child PERTAMA yang musiknya berjudul judul
+ *        pada p, atau nullptr jika tidak ditemukan; list child tidak berubah
+ */
+NodeChildPlaylist* cariMusikPlaylistByJudul(const NodeParentPlaylist* p, const string& judul) {
     NodeChildPlaylist* c = p->firstChild;
 
     while (c != nullptr && c->musik->data.judul != judul) {
@@ -86,7 +101,7 @@ NodeMusik* cariMusikDiPlaylist(const MLLPlaylist& m, const string& judulPlaylist
     NodeParentPlaylist* p = cariPlaylist(m, judulPlaylist);
 
     if (p != nullptr) {
-        NodeChildPlaylist* c = cariMusikPlaylist(p, judulMusik);
+        NodeChildPlaylist* c = cariMusikPlaylistByJudul(p, judulMusik);
         if (c != nullptr) {
             hasil = c->musik;
         }
@@ -97,7 +112,7 @@ NodeMusik* cariMusikDiPlaylist(const MLLPlaylist& m, const string& judulPlaylist
 /*
  * tampilCariMusikDiPlaylist
  * I.S. : m sudah diinisialisasi, boleh kosong atau berisi
- * F.S. : jika ditemukan -> data musik (judul, durasi, tahun rilis) dan nama
+ * F.S. : jika ditemukan -> data musik (id, judul, durasi, tahun rilis) dan nama
  *        playlist tercetak; jika playlist tidak ada atau musik tidak ada di
  *        playlist tersebut -> tercetak pesan yang sesuai; m tidak berubah
  */
@@ -113,8 +128,8 @@ void tampilCariMusikDiPlaylist(const MLLPlaylist& m, const string& judulPlaylist
             cout << "Musik \"" << judulMusik << "\" tidak ada di playlist \""
                  << judulPlaylist << "\".\n";
         } else {
-            cout << "Ditemukan di playlist \"" << judulPlaylist << "\": "
-                 << nm->data.judul
+            cout << "Ditemukan di playlist \"" << judulPlaylist << "\": ["
+                 << nm->data.id << "] " << nm->data.judul
                  << " | durasi: " << nm->data.durasi << " detik"
                  << " | rilis: " << nm->data.tahunRilis << "\n";
         }
@@ -168,16 +183,19 @@ void tampilMLLPlaylist(const MLLPlaylist& m) {
         int noP = 1;
         NodeParentPlaylist* p = m.first;
         while (p != nullptr) {
-            cout << noP << ". " << p->data.judul
-                 << " | deskripsi: " << p->data.deskripsi
-                 << " | diakses: " << p->data.frekuensiAkses << "x\n";
+            cout << noP << ". " << p->data.judul;
+            if (!p->data.deskripsi.empty()) {
+                cout << " | deskripsi: " << p->data.deskripsi;
+            }
+            cout << " | diakses: " << p->data.frekuensiAkses << "x\n";
             if (p->firstChild == nullptr) {
                 cout << "     (belum ada musik)\n";
             } else {
                 int noC = 1;
                 NodeChildPlaylist* c = p->firstChild;
                 while (c != nullptr) {
-                    cout << "     " << noP << "." << noC << " " << c->musik->data.judul
+                    cout << "     " << noP << "." << noC << " ["
+                         << c->musik->data.id << "] " << c->musik->data.judul
                          << " | durasi: " << c->musik->data.durasi << " detik"
                          << " | rilis: " << c->musik->data.tahunRilis << "\n";
                     noC++;
@@ -195,16 +213,19 @@ void tampilMLLPlaylist(const MLLPlaylist& m) {
 /*
  * tambahPlaylist  (insert first)
  * I.S. : m sudah diinisialisasi, boleh kosong atau berisi
- * F.S. : jika pl.judul belum ada -> parent baru berisi pl (child kosong)
- *        menjadi parent PERTAMA, fungsi mengembalikan true.
+ * F.S. : jika judul belum ada -> parent baru berjudul judul (deskripsi kosong,
+ *        frekuensiAkses = 0, child kosong) menjadi parent PERTAMA, fungsi
+ *        mengembalikan true.
  *        jika sudah ada -> m tidak berubah, fungsi mengembalikan false
  */
-bool tambahPlaylist(MLLPlaylist& m, const Playlist& pl) {
-    bool ditambah = (cariPlaylist(m, pl.judul) == nullptr);
+bool tambahPlaylist(MLLPlaylist& m, const string& judul) {
+    bool ditambah = (cariPlaylist(m, judul) == nullptr);
 
     if (ditambah) {
         NodeParentPlaylist* baru = new NodeParentPlaylist;
-        baru->data = pl;
+        baru->data.judul = judul;
+        baru->data.deskripsi = "";
+        baru->data.frekuensiAkses = 0;
         baru->firstChild = nullptr;
         baru->next = m.first;
         m.first = baru;
@@ -216,14 +237,14 @@ bool tambahPlaylist(MLLPlaylist& m, const Playlist& pl) {
  * tambahChildPlaylist  (insert last, O(n))
  * I.S. : p sudah ada (tidak nullptr), nodeMusik menunjuk ke node valid di SLL,
  *        list child boleh kosong atau berisi
- * F.S. : jika musik tersebut belum ada pada p -> child baru yang menunjuk ke
- *        nodeMusik menjadi child TERAKHIR, fungsi mengembalikan true.
+ * F.S. : jika musik ber-id tersebut belum ada pada p -> child baru yang
+ *        menunjuk ke nodeMusik menjadi child TERAKHIR, fungsi mengembalikan true.
  *        jika sudah ada (atau nodeMusik nullptr) -> list child tidak berubah,
  *        fungsi mengembalikan false
  */
 bool tambahChildPlaylist(NodeParentPlaylist* p, NodeMusik* nodeMusik) {
     bool ditambah = (nodeMusik != nullptr &&
-                     cariMusikPlaylist(p, nodeMusik->data.judul) == nullptr);
+                     cariMusikPlaylist(p, nodeMusik->data.id) == nullptr);
 
     if (ditambah) {
         NodeChildPlaylist* baru = new NodeChildPlaylist;
@@ -247,7 +268,7 @@ bool tambahChildPlaylist(NodeParentPlaylist* p, NodeMusik* nodeMusik) {
  * tambahMusikKePlaylist  (sinkronisasi ke SLL utama + child berupa pointer)
  * I.S. : m dan sll sudah diinisialisasi
  * F.S. : jika playlist judulPlaylist ada -> musik didaftarkan ke sll jika
- *        judulnya belum terdaftar (jika sudah, tidak diduplikasi), lalu child
+ *        id-nya belum terdaftar (jika sudah, tidak diduplikasi), lalu child
  *        baru yang menunjuk ke node musik di sll disisipkan ke playlist
  *        (insert last). Mengembalikan true jika child berhasil ditambahkan.
  *        jika playlist tidak ada -> m dan sll tidak berubah, mengembalikan false.
@@ -259,9 +280,9 @@ bool tambahMusikKePlaylist(MLLPlaylist& m, ListMusik& sll,
     NodeParentPlaylist* p = cariPlaylist(m, judulPlaylist);
 
     if (p != nullptr) {
-        // tambahMusik sudah mengecek duplikasi di SLL (dilewati jika sudah ada)
+        // tambahMusik sudah mengecek duplikasi id di SLL (dilewati jika sudah ada)
         tambahMusik(sll, musik);
-        NodeMusik* nodeSll = cariMusik(sll, musik.judul);
+        NodeMusik* nodeSll = cariMusik(sll, musik.id);
         berhasil = tambahChildPlaylist(p, nodeSll);
     }
     return berhasil;
@@ -287,25 +308,25 @@ bool aksesPlaylist(MLLPlaylist& m, const string& judulPlaylist) {
 /* ===================== Penghapusan ===================== */
 
 /*
- * hapusMusikPlaylist  (hapus berdasarkan judul, O(n))
+ * hapusMusikPlaylist  (hapus berdasarkan id, O(n))
  * I.S. : p sudah ada (tidak nullptr), list child boleh kosong atau berisi
- * F.S. : jika musik berjudul judul ada pada p -> node child-nya dihapus
+ * F.S. : jika musik ber-id id ada pada p -> node child-nya dihapus
  *        (awal/tengah/akhir), fungsi mengembalikan true. Node musik di SLL
  *        tidak ikut dihapus.
  *        jika tidak ada -> list child tidak berubah, fungsi mengembalikan false
  */
-bool hapusMusikPlaylist(NodeParentPlaylist* p, const string& judul) {
+bool hapusMusikPlaylist(NodeParentPlaylist* p, const string& id) {
     bool berhasil = false;
 
     if (p->firstChild != nullptr) {
-        if (p->firstChild->musik->data.judul == judul) {
+        if (p->firstChild->musik->data.id == id) {
             NodeChildPlaylist* temp = p->firstChild;
             p->firstChild = temp->next;
             delete temp;
             berhasil = true;
         } else {
             NodeChildPlaylist* prev = p->firstChild;
-            while (prev->next != nullptr && prev->next->musik->data.judul != judul) {
+            while (prev->next != nullptr && prev->next->musik->data.id != id) {
                 prev = prev->next;
             }
             if (prev->next != nullptr) {
@@ -356,17 +377,17 @@ bool hapusPlaylist(MLLPlaylist& m, const string& judul) {
 /*
  * hapusReferensiMusik
  * I.S. : m sudah diinisialisasi, boleh kosong atau berisi
- * F.S. : seluruh child yang menunjuk ke musik berjudul judul dihapus dari
+ * F.S. : seluruh child yang menunjuk ke musik ber-id id dihapus dari
  *        semua playlist di m; mengembalikan banyak child yang dihapus
  *        (0 jika tidak ada). Dipanggil sebelum musik dihapus dari SLL agar
  *        tidak ada pointer yang menggantung.
  */
-int hapusReferensiMusik(MLLPlaylist& m, const string& judul) {
+int hapusReferensiMusik(MLLPlaylist& m, const string& id) {
     int terhapus = 0;
     NodeParentPlaylist* p = m.first;
 
     while (p != nullptr) {
-        if (hapusMusikPlaylist(p, judul)) {
+        if (hapusMusikPlaylist(p, id)) {
             terhapus++;
         }
         p = p->next;

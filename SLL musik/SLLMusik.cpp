@@ -28,12 +28,27 @@ void bersihkanMusik(ListMusik& l) {
 /* ===================== Pencarian & informasi ===================== */
 
 /*
- * cariMusik  (penelusuran linear, O(n); pencocokan judul persis/huruf besar-kecil dibedakan)
+ * cariMusik  (penelusuran linear, O(n); pencocokan id persis/huruf besar-kecil dibedakan)
  * I.S. : l sudah diinisialisasi, boleh kosong atau berisi
- * F.S. : mengembalikan pointer ke node yang judulnya sama dengan judul,
+ * F.S. : mengembalikan pointer ke node yang id-nya sama dengan id,
  *        atau nullptr jika tidak ditemukan; l tidak berubah
  */
-NodeMusik* cariMusik(const ListMusik& l, const string& judul) {
+NodeMusik* cariMusik(const ListMusik& l, const string& id) {
+    NodeMusik* p = l.first;
+
+    while (p != nullptr && p->data.id != id) {
+        p = p->next;
+    }
+    return p;
+}
+
+/*
+ * cariMusikByJudul  (penelusuran linear, O(n); huruf besar-kecil dibedakan)
+ * I.S. : l sudah diinisialisasi, boleh kosong atau berisi
+ * F.S. : mengembalikan pointer ke node PERTAMA yang judulnya sama dengan judul,
+ *        atau nullptr jika tidak ditemukan; l tidak berubah
+ */
+NodeMusik* cariMusikByJudul(const ListMusik& l, const string& judul) {
     NodeMusik* p = l.first;
 
     while (p != nullptr && p->data.judul != judul) {
@@ -45,11 +60,11 @@ NodeMusik* cariMusik(const ListMusik& l, const string& judul) {
 /*
  * sudahAdaMusik
  * I.S. : l sudah diinisialisasi, boleh kosong atau berisi
- * F.S. : mengembalikan true jika judul terdaftar di l, false jika tidak;
+ * F.S. : mengembalikan true jika id terdaftar di l, false jika tidak;
  *        l tidak berubah
  */
-bool sudahAdaMusik(const ListMusik& l, const string& judul) {
-    return cariMusik(l, judul) != nullptr;
+bool sudahAdaMusik(const ListMusik& l, const string& id) {
+    return cariMusik(l, id) != nullptr;
 }
 
 /*
@@ -72,7 +87,7 @@ int jumlahMusik(const ListMusik& l) {
  * tampilMusik
  * I.S. : l sudah diinisialisasi, boleh kosong atau berisi
  * F.S. : seluruh musik pada l tercetak berurutan dari node pertama dengan
- *        penomoran (judul, durasi dalam detik, tahun rilis); jika kosong
+ *        penomoran (id, judul, durasi dalam detik, tahun rilis); jika kosong
  *        tercetak pesan bahwa list kosong; l tidak berubah
  */
 void tampilMusik(const ListMusik& l) {
@@ -82,7 +97,7 @@ void tampilMusik(const ListMusik& l) {
         int no = 1;
         NodeMusik* p = l.first;
         while (p != nullptr) {
-            cout << no << ". " << p->data.judul
+            cout << no << ". [" << p->data.id << "] " << p->data.judul
                  << " | durasi: " << p->data.durasi << " detik"
                  << " | rilis: " << p->data.tahunRilis << "\n";
             no++;
@@ -96,13 +111,13 @@ void tampilMusik(const ListMusik& l) {
 /*
  * tambahMusik  (insert last; O(n) karena SLL standar tidak punya pointer last)
  * I.S. : l sudah diinisialisasi, boleh kosong atau berisi
- * F.S. : jika m.judul belum ada di l -> node baru berisi m menjadi node
+ * F.S. : jika m.id belum ada di l -> node baru berisi m menjadi node
  *        TERAKHIR, fungsi mengembalikan true.
- *        jika m.judul sudah ada -> l tidak berubah (tidak ada duplikasi),
+ *        jika m.id sudah ada -> l tidak berubah (tidak ada duplikasi),
  *        fungsi mengembalikan false
  */
 bool tambahMusik(ListMusik& l, const Musik& m) {
-    bool ditambah = !sudahAdaMusik(l, m.judul);
+    bool ditambah = !sudahAdaMusik(l, m.id);
 
     if (ditambah) {
         NodeMusik* baru = new NodeMusik;
@@ -193,22 +208,22 @@ bool hapusSetelahMusik(NodeMusik* prev, Musik& hasil) {
 }
 
 /*
- * hapusMusik  (hapus berdasarkan judul, O(n))
+ * hapusMusik  (hapus berdasarkan id, O(n))
  * I.S. : l sudah diinisialisasi, boleh kosong atau berisi
- * F.S. : jika judul ada di l -> node berjudul tersebut dihapus (di awal,
+ * F.S. : jika id ada di l -> node ber-id tersebut dihapus (di awal,
  *        tengah, atau akhir), fungsi mengembalikan true.
  *        jika tidak ada -> l tidak berubah, fungsi mengembalikan false
  */
-bool hapusMusik(ListMusik& l, const string& judul) {
+bool hapusMusik(ListMusik& l, const string& id) {
     bool berhasil = false;
     Musik dummy;
 
     if (l.first != nullptr) {
-        if (l.first->data.judul == judul) {
+        if (l.first->data.id == id) {
             berhasil = hapusAwalMusik(l, dummy);
         } else {
             NodeMusik* prev = l.first;
-            while (prev->next != nullptr && prev->next->data.judul != judul) {
+            while (prev->next != nullptr && prev->next->data.id != id) {
                 prev = prev->next;
             }
             berhasil = hapusSetelahMusik(prev, dummy);
