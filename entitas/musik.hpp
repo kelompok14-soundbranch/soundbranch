@@ -4,6 +4,7 @@
 #include <string>
 
 struct Musik {
+    std::string id;
     std::string judul;
     unsigned int durasi;
     unsigned short tahunRilis;

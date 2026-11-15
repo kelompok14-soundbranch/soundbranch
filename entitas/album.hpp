@@ -4,6 +4,7 @@
 #include <string>
 
 struct Album {
+    std::string id;
     std::string nama;
     std::string deskripsi;
     unsigned short tahunRilis;

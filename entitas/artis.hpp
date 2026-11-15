@@ -4,6 +4,7 @@
 #include <string>
 
 struct Artis {
+    std::string id;
     std::string nama;
     std::string biografi;
 };
