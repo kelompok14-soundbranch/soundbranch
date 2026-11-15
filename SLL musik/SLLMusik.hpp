@@ -1,5 +1,5 @@
-#ifndef SLLMUSIK_H
-#define SLLMUSIK_H
+#ifndef SLLMUSIK_hpp
+#define SLLMUSIK_hpp
 
 #include <iostream>
 #include <string>
@@ -24,7 +24,7 @@ struct ListMusik {
 void inisialisasiMusik(ListMusik& l);   // membuat list kosong
 void bersihkanMusik(ListMusik& l);      // membebaskan seluruh node
 
-/* Pencarian & informasi */
+/* ===================== Pencarian & informasi ===================== */
 
 NodeMusik* cariMusik(const ListMusik& l, const string& judul);   // nullptr jika tidak ada
 bool sudahAdaMusik(const ListMusik& l, const string& judul);     // true jika judul sudah terdaftar
