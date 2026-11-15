@@ -73,6 +73,55 @@ NodeChildPlaylist* cariMusikPlaylist(const NodeParentPlaylist* p, const string& 
 }
 
 /*
+ * cariMusikDiPlaylist  (pencarian dua tingkat, O(n + k))
+ * I.S. : m sudah diinisialisasi, boleh kosong atau berisi
+ * F.S. : mengembalikan pointer ke node musik (di SLL) yang berjudul judulMusik
+ *        dan terdaftar pada playlist judulPlaylist; mengembalikan nullptr jika
+ *        playlist tidak ada atau musik tidak ada di playlist tersebut;
+ *        m tidak berubah
+ */
+NodeMusik* cariMusikDiPlaylist(const MLLPlaylist& m, const string& judulPlaylist,
+                               const string& judulMusik) {
+    NodeMusik* hasil = nullptr;
+    NodeParentPlaylist* p = cariPlaylist(m, judulPlaylist);
+
+    if (p != nullptr) {
+        NodeChildPlaylist* c = cariMusikPlaylist(p, judulMusik);
+        if (c != nullptr) {
+            hasil = c->musik;
+        }
+    }
+    return hasil;
+}
+
+/*
+ * tampilCariMusikDiPlaylist
+ * I.S. : m sudah diinisialisasi, boleh kosong atau berisi
+ * F.S. : jika ditemukan -> data musik (judul, durasi, tahun rilis) dan nama
+ *        playlist tercetak; jika playlist tidak ada atau musik tidak ada di
+ *        playlist tersebut -> tercetak pesan yang sesuai; m tidak berubah
+ */
+void tampilCariMusikDiPlaylist(const MLLPlaylist& m, const string& judulPlaylist,
+                               const string& judulMusik) {
+    NodeParentPlaylist* p = cariPlaylist(m, judulPlaylist);
+
+    if (p == nullptr) {
+        cout << "Playlist \"" << judulPlaylist << "\" tidak ditemukan.\n";
+    } else {
+        NodeMusik* nm = cariMusikDiPlaylist(m, judulPlaylist, judulMusik);
+        if (nm == nullptr) {
+            cout << "Musik \"" << judulMusik << "\" tidak ada di playlist \""
+                 << judulPlaylist << "\".\n";
+        } else {
+            cout << "Ditemukan di playlist \"" << judulPlaylist << "\": "
+                 << nm->data.judul
+                 << " | durasi: " << nm->data.durasi << " detik"
+                 << " | rilis: " << nm->data.tahunRilis << "\n";
+        }
+    }
+}
+
+/*
  * jumlahPlaylist
  * I.S. : m sudah diinisialisasi, boleh kosong atau berisi
  * F.S. : mengembalikan banyak playlist pada m (0 jika kosong); m tidak berubah

@@ -38,6 +38,11 @@ void bersihkanMLLPlaylist(MLLPlaylist& m);
 
 NodeParentPlaylist* cariPlaylist(const MLLPlaylist& m, const string& judul);
 NodeChildPlaylist* cariMusikPlaylist(const NodeParentPlaylist* p, const string& judul);
+// Pencarian tingkat tinggi: user cukup memberi judul playlist dan judul musik
+NodeMusik* cariMusikDiPlaylist(const MLLPlaylist& m, const string& judulPlaylist,
+                               const string& judulMusik);
+void tampilCariMusikDiPlaylist(const MLLPlaylist& m, const string& judulPlaylist,
+                               const string& judulMusik);
 int jumlahPlaylist(const MLLPlaylist& m);
 int jumlahMusikPlaylist(const NodeParentPlaylist* p);
 void tampilMLLPlaylist(const MLLPlaylist& m);
