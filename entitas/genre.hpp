@@ -5,7 +5,6 @@
 
 struct Genre {
     std::string nama;
-    std::string deskripsi;
 };
 
 #endif
