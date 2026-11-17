@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "../../entitas/artis.hpp"
+#include "../../entitas/artis/artis.hpp"
 #include "../__common__/node-relasi-musik.hpp"
 
 struct NodeArtis {
@@ -23,17 +23,17 @@ ListArtis buatListArtis();
 // mengembalikan total seluruh artis yang terdapat dalam listArtis
 unsigned int hitungTotalArtis(const ListArtis& listArtis);
 
-// mengembalikan true jika listArtis kosong, atau false jika listArtis memiliki minimal satu artis
+// mengembalikan true jika listArtis kosong, atau false jika listArtis sudah berisi sejumlah artis
 bool kosongArtis(const ListArtis& listArtis);
 
-// mengembalikan pointer ke artis yang memiliki ID sesuai idArtisCari dalam listArtis, atau nullptr jika artis tidak ditemukan
+// mengembalikan pointer ke artis dengan ID idArtisCari dalam listArtis, atau nullptr jika idArtisCari tidak valid
 Artis* cariArtis(const ListArtis& listArtis, const std::string& idArtisCari);
 
-// I.S.: listArtis mungkin kosong atau sudah berisi sejumlah artis
+// I.S.: listArtis mungkin kosong atau sudah berisi sejumlah artis. artisBaru adalah artis yang valid
 // F.S.: jika artis dengan ID yang sama sudah terdaftar, listArtis tidak berubah. Jika belum terdaftar, data artisBaru ditambahkan pada bagian akhir listArtis
 void tambahArtis(ListArtis& listArtis, const Artis& artisBaru);
 
-// I.S.: listArtis mungkin kosong atau sudah berisi sejumlah artis
+// I.S.: listArtis sudah berisi sejumlah artis. idArtisHapus mungkin valid atau tidak valid
 // F.S.: jika artis tidak ditemukan atau masih memiliki relasi musik, listArtis tidak berubah. Jika artis ditemukan dan tidak memiliki relasi musik, artis dihapus
 void hapusArtis(ListArtis& listArtis, const std::string& idArtisHapus);
 
@@ -50,7 +50,7 @@ unsigned int hitungTotalArtisMusik(const ListArtis& listArtis, const std::string
 bool kosongArtisMusik(const ListArtis& listArtis, const std::string& idArtis);
 
 // mengembalikan list artis yang memiliki relasi dengan data musik yang ditunjuk oleh pointer musik, atau list artis kosong jika pointer musik tidak valid atau tidak ditemukan relasi yang sesuai
-ListArtis cariArtisMusik(const ListArtis& listArtis, Musik* const musik);
+ListArtis cariSemuaArtisMusik(const ListArtis& listArtis, Musik* const musik);
 
 // I.S.: listArtis mungkin kosong atau sudah memiliki artis dan relasi musik. Pointer musik mungkin nullptr atau menunjuk pada data musik yang valid
 // F.S.: jika pointer musik tidak valid atau artis tidak ditemukan atau musik sudah terdaftar pada artis tersebut, listArtis tidak berubah. Jika tidak, relasi baru ditambahkan pada bagian akhir daftar relasi musik dari artis dengan ID sesuai idArtis
@@ -59,6 +59,10 @@ void tambahArtisMusik(ListArtis& listArtis, const std::string& idArtis, Musik* c
 // I.S.: listArtis mungkin kosong atau sudah memiliki artis dan relasi musik. Pointer musik mungkin nullptr atau menunjuk pada data musik yang valid
 // F.S.: jika pointer musik tidak valid, artis tidak ditemukan, atau musik tidak terdaftar pada artis tersebut, struktur ListArtis tidak berubah. Jika relasi ditemukan, node relasi musik dihapus dan hubungan antar-node relasi tetap terjaga
 void hapusArtisMusik(ListArtis& listArtis, const std::string& idArtis, Musik* const musik);
+
+// I.S. listArtis sudah memiliki artis dan relasi musik. Pointer musik menunjuk ke musik yang valid
+// F.S. musik yang ditunjuk pointer musik tidak lagi memiliki artis dalam listArtis
+void hapusSemuaArtisMusik(ListArtis& listArtis, Musik* const musik);
 
 // I.S.: listArtis mungkin kosong atau sudah memiliki artis dan relasi musik
 // F.S.: jika artis tidak ditemukan, ditampilkan pesan bahwa artis tidak ditemukan. Jika artis belum memiliki musik, ditampilkan pesan bahwa artis belum memiliki musik. Jika artis memiliki relasi musik, seluruh judul musik yang terhubung dengan artis tersebut ditampilkan. listArtis tidak mengalami perubahan

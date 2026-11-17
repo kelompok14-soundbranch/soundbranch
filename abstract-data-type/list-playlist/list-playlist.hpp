@@ -2,7 +2,7 @@
 #define LIST_PLAYLIST_HPP
 
 #include <string>
-#include "../../entitas/playlist.hpp"
+#include "../../entitas/playlist/playlist.hpp"
 #include "../__common__/node-relasi-musik.hpp"
 
 struct NodePlaylist {
@@ -27,7 +27,7 @@ bool kosongPlaylist(const ListPlaylist& listPlaylist);
 // mengembalikan pointer ke playlist dengan judul sesuai judulPlaylistCari, atau nullptr jika tidak ditemukan
 Playlist* cariPlaylist(const ListPlaylist& listPlaylist, const std::string& judulPlaylistCari);
 
-// I.S.: listPlaylist mungkin kosong atau sudah berisi sejumlah playlist
+// I.S.: listPlaylist mungkin kosong atau sudah berisi sejumlah playlist. playlistBaru adalah playlist yang valid
 // F.S.: jika playlist dengan judul yang sama sudah terdaftar, listPlaylist tidak berubah. Jika tidak, playlistBaru ditambahkan pada bagian akhir listPlaylist
 void tambahPlaylist(ListPlaylist& listPlaylist, const Playlist& playlistBaru);
 
@@ -48,7 +48,7 @@ unsigned int hitungTotalPlaylistMusik(const ListPlaylist& listPlaylist, const st
 bool kosongPlaylistMusik(const ListPlaylist& listPlaylist, const std::string& judulPlaylist);
 
 // mengembalikan list playlist yang memiliki relasi dengan musik yang ditunjuk oleh pointer musik, atau list playlist kosong jika pointer musik nullptr atau tidak ditemukan relasi yang sesuai
-ListPlaylist cariPlaylistMusik(const ListPlaylist& listPlaylist, Musik* const musik);
+ListPlaylist cariSemuaPlaylistMusik(const ListPlaylist& listPlaylist, Musik* const musik);
 
 // I.S.: listPlaylist mungkin kosong atau sudah memiliki playlist dan relasi musik. Pointer musik mungkin nullptr atau menunjuk pada data musik yang valid
 // F.S.: jika pointer musik nullptr, playlist tidak ditemukan, atau musik sudah terdaftar pada playlist tersebut, listPlaylist tidak berubah. Jika tidak, relasi baru ditambahkan pada bagian akhir daftar relasi musik playlist
@@ -57,6 +57,10 @@ void tambahPlaylistMusik(ListPlaylist& listPlaylist, const std::string& judulPla
 // I.S.: listPlaylist mungkin kosong atau sudah memiliki playlist dan relasi musik. Pointer musik mungkin nullptr atau menunjuk pada data musik yang valid
 // F.S.: jika pointer musik nullptr, playlist tidak ditemukan, atau musik tidak terdaftar pada playlist tersebut, listPlaylist tidak berubah. Jika relasi ditemukan, node relasi musik dihapus dan hubungan antar-node relasi tetap terjaga
 void hapusPlaylistMusik(ListPlaylist& listPlaylist, const std::string& judulPlaylist, Musik* const musik);
+
+// I.S. listPlaylist sudah memiliki playlist dan relasi musik. Pointer musik menunjuk ke musik yang valid
+// F.S. musik yang ditunjuk pointer musik tidak lagi memiliki playlist dalam listPlaylist
+void hapusSemuaPlaylistMusik(ListPlaylist& listPlaylist, Musik* const musik);
 
 // I.S.: listPlaylist mungkin kosong atau sudah memiliki playlist dan relasi musik
 // F.S.: jika playlist tidak ditemukan, ditampilkan pesan bahwa playlist tidak ditemukan. Jika playlist belum memiliki musik, ditampilkan pesan bahwa playlist belum memiliki musik. Jika playlist memiliki relasi musik, seluruh judul musik yang terhubung dengan playlist tersebut ditampilkan. listPlaylist tidak mengalami perubahan

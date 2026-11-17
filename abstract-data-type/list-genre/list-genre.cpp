@@ -38,8 +38,7 @@ Genre* cariGenre(const ListGenre& listGenre, const std::string& namaGenreCari) {
 
 void tambahGenre(ListGenre& listGenre, const Genre& genreBaru) {
     if (cariGenre(listGenre, genreBaru.nama) != nullptr) {
-        std::cout << "Genre sudah terdaftar" << std::endl;
-        return;
+        throw std::string("Sudah ada genre lain dengan nama yang sama");
     }
 
     NodeGenre* nodeGenreBaru = new NodeGenre;
@@ -57,8 +56,6 @@ void tambahGenre(ListGenre& listGenre, const Genre& genreBaru) {
 
         current->next = nodeGenreBaru;
     }
-
-    std::cout << "Genre berhasil ditambahkan" << std::endl;
 }
 
 void hapusGenre(ListGenre& listGenre, const std::string& namaGenreHapus) {
@@ -70,13 +67,11 @@ void hapusGenre(ListGenre& listGenre, const std::string& namaGenreHapus) {
     }
 
     if (current == nullptr) {
-        std::cout << "Genre tidak ditemukan" << std::endl;
-        return;
+        throw std::string("Genre tidak ditemukan");
     }
 
     if (current->firstMusik != nullptr) {
-        std::cout << "Genre tidak dapat dihapus karena masih memiliki relasi musik" << std::endl;
-        return;
+        throw std::string("Genre tidak dapat dihapus karena masih memiliki relasi musik");
     }
 
     if (previous == nullptr) {
@@ -86,8 +81,6 @@ void hapusGenre(ListGenre& listGenre, const std::string& namaGenreHapus) {
     }
 
     delete current;
-
-    std::cout << "Genre berhasil dihapus" << std::endl;
 }
 
 void tampilkanSemuaGenre(const ListGenre& listGenre) {
@@ -96,14 +89,17 @@ void tampilkanSemuaGenre(const ListGenre& listGenre) {
         return;
     }
 
-    std::cout << "========== DAFTAR GENRE ==========" << std::endl;
-
+    unsigned int nomor = 1;
     NodeGenre* current = listGenre.first;
     while (current != nullptr) {
-        std::cout << "Nama genre: " << current->genre.nama << std::endl;
+        std::cout << "----------------------------------" << std::endl;
+        std::cout << "Genre " << nomor << std::endl;
+        tampilkanGenre(current->genre);
+        std::cout << std::endl;
         tampilkanSemuaGenreMusik(listGenre, current->genre.nama);
         std::cout << "----------------------------------" << std::endl;
 
+        nomor++;
         current = current->next;
     }
 }
@@ -143,12 +139,8 @@ bool kosongGenreMusik(const ListGenre& listGenre, const std::string& namaGenre) 
     return current->firstMusik == nullptr;
 }
 
-ListGenre cariGenreMusik(const ListGenre& listGenre, const Musik* const musik) {
+ListGenre cariSemuaGenreMusik(const ListGenre& listGenre, Musik* const musik) {
     ListGenre hasil = buatListGenre();
-
-    if (musik == nullptr) {
-        return hasil;
-    }
 
     NodeGenre* currentGenre = listGenre.first;
     while (currentGenre != nullptr) {
@@ -175,7 +167,7 @@ ListGenre cariGenreMusik(const ListGenre& listGenre, const Musik* const musik) {
                 }
 
                 NodeRelasiMusik* nodeRelasiBaru = new NodeRelasiMusik;
-                nodeRelasiBaru->musik = const_cast<Musik*>(musik);
+                nodeRelasiBaru->musik = musik;
                 nodeRelasiBaru->next = nullptr;
 
                 nodeGenreBaru->firstMusik = nodeRelasiBaru;
@@ -193,26 +185,19 @@ ListGenre cariGenreMusik(const ListGenre& listGenre, const Musik* const musik) {
 }
 
 void tambahGenreMusik(ListGenre& listGenre, const std::string& namaGenre, Musik* const musik) {
-    if (musik == nullptr) {
-        std::cout << "Data musik tidak valid" << std::endl;
-        return;
-    }
-
     NodeGenre* currentGenre = listGenre.first;
     while (currentGenre != nullptr && currentGenre->genre.nama != namaGenre) {
         currentGenre = currentGenre->next;
     }
 
     if (currentGenre == nullptr) {
-        std::cout << "Genre tidak ditemukan" << std::endl;
-        return;
+        throw std::string("Genre tidak ditemukan");
     }
 
     NodeRelasiMusik* currentRelasi = currentGenre->firstMusik;
     while (currentRelasi != nullptr) {
         if (currentRelasi->musik == musik) {
-            std::cout << "Musik sudah terdaftar pada genre tersebut" << std::endl;
-            return;
+            throw std::string("Musik sudah terdaftar pada genre tersebut sebelumnya");
         }
 
         currentRelasi = currentRelasi->next;
@@ -233,24 +218,16 @@ void tambahGenreMusik(ListGenre& listGenre, const std::string& namaGenre, Musik*
     
         currentRelasi->next = nodeRelasiBaru;
     }
-
-    std::cout << "Relasi genre musik berhasil ditambahkan" << std::endl;
 }
 
-void hapusGenreMusik(ListGenre& listGenre, const std::string& namaGenre, Musik* const musik) {
-    if (musik == nullptr) {
-        std::cout << "Data musik tidak valid" << std::endl;
-        return;
-    }
-    
+void hapusGenreMusik(ListGenre& listGenre, const std::string& namaGenre, Musik* const musik) {    
     NodeGenre* currentGenre = listGenre.first;
     while (currentGenre != nullptr && currentGenre->genre.nama != namaGenre) {
         currentGenre = currentGenre->next;
     }
     
     if (currentGenre == nullptr) {
-        std::cout << "Genre tidak ditemukan" << std::endl;
-        return;
+        throw std::string("Genre tidak ditemukan");
     }
     
     NodeRelasiMusik* currentRelasi = currentGenre->firstMusik;
@@ -261,8 +238,7 @@ void hapusGenreMusik(ListGenre& listGenre, const std::string& namaGenre, Musik* 
     }
     
     if (currentRelasi == nullptr) {
-        std::cout << "Musik tidak terdaftar pada genre tersebut" << std::endl;
-        return;
+        throw std::string("Musik tidak terdaftar pada genre tersebut");
     }
     
     if (previousRelasi == nullptr) {
@@ -272,8 +248,35 @@ void hapusGenreMusik(ListGenre& listGenre, const std::string& namaGenre, Musik* 
     }
     
     delete currentRelasi;
-    
-    std::cout << "Relasi genre musik berhasil dihapus" << std::endl;
+}
+
+void hapusSemuaGenreMusik(ListGenre& listGenre, Musik* const musik) {
+    NodeGenre* currentGenre = listGenre.first;
+
+    while (currentGenre != nullptr) {
+        NodeRelasiMusik* currentRelasi = currentGenre->firstMusik;
+        NodeRelasiMusik* previousRelasi = nullptr;
+
+        while (currentRelasi != nullptr) {
+            if (currentRelasi->musik == musik) {
+                NodeRelasiMusik* hapus = currentRelasi;
+
+                if (previousRelasi == nullptr) {
+                    currentGenre->firstMusik = currentRelasi->next;
+                } else {
+                    previousRelasi->next = currentRelasi->next;
+                }
+
+                currentRelasi = currentRelasi->next;
+                delete hapus;
+            } else {
+                previousRelasi = currentRelasi;
+                currentRelasi = currentRelasi->next;
+            }
+        }
+
+        currentGenre = currentGenre->next;
+    }
 }
 
 void tampilkanSemuaGenreMusik(const ListGenre& listGenre, const std::string& namaGenre) {
@@ -292,13 +295,16 @@ void tampilkanSemuaGenreMusik(const ListGenre& listGenre, const std::string& nam
         return;
     }
     
-    std::cout << "Daftar musik:" << std::endl;
+    std::cout << "DAFTAR MUSIK" << std::endl;
 
-    NodeRelasiMusik* currentRelasi = currentGenre->firstMusik;
     unsigned int nomor = 1;
+    NodeRelasiMusik* currentRelasi = currentGenre->firstMusik;
     while (currentRelasi != nullptr) {
         if (currentRelasi->musik != nullptr) {
-            std::cout << nomor << ". " << currentRelasi->musik->judul << std::endl;
+            std::cout << "----------" << std::endl;
+            std::cout << "Relasi genre musik " << nomor << std::endl;
+            tampilkanMusik(*currentRelasi->musik);
+            std::cout << "----------" << std::endl;
             nomor++;
         }
 

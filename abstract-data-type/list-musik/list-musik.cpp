@@ -39,8 +39,7 @@ Musik* cariMusik(const ListMusik& listMusik, const std::string& idMusikCari) {
 
 void tambahMusik(ListMusik& listMusik, const Musik& musikBaru) {
     if (cariMusik(listMusik, musikBaru.id) != nullptr) {
-        std::cout << "Musik sudah terdaftar" << std::endl;
-        return;
+        throw std::string("Sudah ada musik lain dengan ID yang sama");
     }
 
     NodeMusik* nodeMusikBaru = new NodeMusik;
@@ -51,18 +50,15 @@ void tambahMusik(ListMusik& listMusik, const Musik& musikBaru) {
         listMusik.first = nodeMusikBaru;
     } else {
         NodeMusik* current = listMusik.first;
-
         while (current->next != nullptr) {
             current = current->next;
         }
 
         current->next = nodeMusikBaru;
     }
-
-    std::cout << "Musik berhasil ditambahkan" << std::endl;
 }
 
-void hapusMusik(ListMusik& listMusik, const std::string& idMusikHapus) {
+void hapusMusik(ListMusik& listMusik, ListArtis& listArtis, ListAlbum& listAlbum, ListGenre& listGenre, ListPlaylist& listPlaylist, const std::string& idMusikHapus) {
     NodeMusik* current = listMusik.first;
     NodeMusik* previous = nullptr;
 
@@ -72,9 +68,13 @@ void hapusMusik(ListMusik& listMusik, const std::string& idMusikHapus) {
     }
 
     if (current == nullptr) {
-        std::cout << "Musik tidak ditemukan" << std::endl;
-        return;
+        throw std::string("Musik tidak ditemukan");
     }
+
+    hapusSemuaArtisMusik(listArtis, &current->musik);
+    hapusSemuaAlbumMusik(listAlbum, &current->musik);
+    hapusSemuaGenreMusik(listGenre, &current->musik);
+    hapusSemuaPlaylistMusik(listPlaylist, &current->musik);
 
     if (previous == nullptr) {
         listMusik.first = current->next;
@@ -83,55 +83,29 @@ void hapusMusik(ListMusik& listMusik, const std::string& idMusikHapus) {
     }
 
     delete current;
-
-    std::cout << "Musik berhasil dihapus" << std::endl;
 }
 
-void tampilkanSemuaMusik(const ListMusik& listMusik) {
+void tampilkanSemuaMusik(const ListMusik& listMusik, const ListArtis& listArtis, const ListAlbum& ListAlbum, const ListGenre& ListGenre, const ListPlaylist& listPlaylist) {
     if (kosongMusik(listMusik)) {
         std::cout << "Belum ada musik yang terdaftar" << std::endl;
         return;
     }
 
-    std::cout << "========== DAFTAR MUSIK ==========" << std::endl;
-
     NodeMusik* current = listMusik.first;
     unsigned int nomor = 1;
 
     while (current != nullptr) {
-        std::cout << nomor << ". " << std::endl;
-        std::cout << "ID musik: " << current->musik.id << std::endl;
-        std::cout << "Judul: " << current->musik.judul << std::endl;
-        std::cout << "Durasi: " << current->musik.durasi << " detik" << std::endl;
-        std::cout << "Tahun rilis: " << current->musik.tahunRilis << std::endl;
         std::cout << "----------------------------------" << std::endl;
-
-        nomor++;
-        current = current->next;
-    }
-}
-
-void tampilkanSemuaMusikLengkap(const ListMusik& listMusik, const ListArtis& listArtis, const ListAlbum& ListAlbum, const ListGenre& ListGenre, const ListPlaylist& listPlaylist) {
-    if (kosongMusik(listMusik)) {
-        std::cout << "Belum ada musik yang terdaftar" << std::endl;
-        return;
-    }
-
-    std::cout << "========== DAFTAR MUSIK LENGKAP ==========" << std::endl;
-
-    NodeMusik* current = listMusik.first;
-    unsigned int nomor = 1;
-
-    while (current != nullptr) {
-        std::cout << nomor << ". " << std::endl;
-        std::cout << "ID musik: " << current->musik.id << std::endl;
-        std::cout << "Judul: " << current->musik.judul << std::endl;
-        std::cout << "Durasi: " << current->musik.durasi << " detik" << std::endl;
-        std::cout << "Tahun rilis: " << current->musik.tahunRilis << std::endl;
-        tampilkanSemuaArtis(cariArtisMusik(listArtis, &current->musik));
-        tampilkanSemuaAlbum(cariAlbumMusik(ListAlbum, &current->musik));
-        tampilkanSemuaGenre(cariGenreMusik(ListGenre, &current->musik));
-        tampilkanSemuaPlaylist(cariPlaylistMusik(listPlaylist, &current->musik));
+        std::cout << "Musik " << nomor << std::endl;
+        tampilkanMusik(current->musik);
+        std::cout << std::endl;
+        tampilkanSemuaArtis(cariSemuaArtisMusik(listArtis, &current->musik));
+        std::cout << std::endl;
+        tampilkanSemuaAlbum(cariSemuaAlbumMusik(ListAlbum, &current->musik));
+        std::cout << std::endl;
+        tampilkanSemuaGenre(cariSemuaGenreMusik(ListGenre, &current->musik));
+        std::cout << std::endl;
+        tampilkanSemuaPlaylist(cariSemuaPlaylistMusik(listPlaylist, &current->musik));
         std::cout << "----------------------------------" << std::endl;
 
         nomor++;

@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "../../entitas/genre.hpp"
+#include "../../entitas/genre/genre.hpp"
 #include "../__common__/node-relasi-musik.hpp"
 
 struct NodeGenre {
@@ -29,7 +29,7 @@ bool kosongGenre(const ListGenre& listGenre);
 // mengembalikan pointer ke genre yang memiliki nama sesuai namaGenreCari dalam listGenre, atau nullptr jika genre tidak ditemukan
 Genre* cariGenre(const ListGenre& listGenre, const std::string& namaGenreCari);
 
-// I.S.: listGenre mungkin kosong atau sudah berisi sejumlah genre
+// I.S.: listGenre mungkin kosong atau sudah berisi sejumlah genre. genreBaru adalah genre yang valid
 // F.S.: jika genre dengan nama yang sama sudah terdaftar, listGenre tidak berubah. Jika belum terdaftar, data genreBaru ditambahkan pada bagian akhir listGenre
 void tambahGenre(ListGenre& listGenre, const Genre& genreBaru);
 
@@ -50,7 +50,7 @@ unsigned int hitungTotalGenreMusik(const ListGenre& listGenre, const std::string
 bool kosongGenreMusik(const ListGenre& listGenre, const std::string& namaGenre);
 
 // mengembalikan list genre yang memiliki relasi dengan musik yang ditunjuk oleh pointer musik, atau list genre kosong jika pointer musik tidak valid atau tidak ditemukan relasi yang sesuai
-ListGenre cariGenreMusik(const ListGenre& listGenre, const Musik* const musik);
+ListGenre cariSemuaGenreMusik(const ListGenre& listGenre, Musik* const musik);
 
 // I.S.: listGenre mungkin kosong atau sudah memiliki genre dan relasi musik. Pointer musik mungkin nullptr atau menunjuk pada data musik yang valid
 // F.S.: jika pointer musik tidak valid atau genre tidak ditemukan atau musik sudah terdaftar pada genre tersebut, listGenre tidak berubah. Jika tidak, relasi baru ditambahkan pada bagian akhir daftar relasi musik dari genre dengan nama sesuai namaGenre
@@ -59,6 +59,10 @@ void tambahGenreMusik(ListGenre& listGenre, const std::string& namaGenre, Musik*
 // I.S.: listGenre mungkin kosong atau sudah memiliki genre dan relasi musik. Pointer musik mungkin nullptr atau menunjuk pada data musik yang valid
 // F.S.: jika pointer musik tidak valid, genre tidak ditemukan, atau musik tidak terdaftar pada genre tersebut, struktur ListGenre tidak berubah. Jika relasi ditemukan, node relasi musik dihapus dan hubungan antar-node relasi tetap terjaga
 void hapusGenreMusik(ListGenre& listGenre, const std::string& namaGenre, Musik* const musik);
+
+// I.S. listGenre sudah memiliki genre dan relasi musik. Pointer musik menunjuk ke musik yang valid
+// F.S. musik yang ditunjuk pointer musik tidak lagi memiliki genre dalam listGenre
+void hapusSemuaGenreMusik(ListGenre& listGenre, Musik* const musik);
 
 // I.S.: listGenre mungkin kosong atau sudah memiliki genre dan relasi musik
 // F.S.: jika genre tidak ditemukan, ditampilkan pesan bahwa genre tidak ditemukan. Jika genre belum memiliki musik, ditampilkan pesan bahwa genre belum memiliki musik. Jika genre memiliki relasi musik, seluruh judul musik yang terhubung dengan genre tersebut ditampilkan. listGenre tidak mengalami perubahan

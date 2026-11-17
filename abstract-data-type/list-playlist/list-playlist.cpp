@@ -38,8 +38,7 @@ Playlist* cariPlaylist(const ListPlaylist& listPlaylist, const std::string& nama
 
 void tambahPlaylist(ListPlaylist& listPlaylist, const Playlist& playlistBaru) {
     if (cariPlaylist(listPlaylist, playlistBaru.judul) != nullptr) {
-        std::cout << "Playlist sudah terdaftar" << std::endl;
-        return;
+        throw std::string("Sudah ada playlist lain dengan judul yang sama");
     }
 
     NodePlaylist* nodePlaylistBaru = new NodePlaylist;
@@ -57,8 +56,6 @@ void tambahPlaylist(ListPlaylist& listPlaylist, const Playlist& playlistBaru) {
 
         current->next = nodePlaylistBaru;
     }
-
-    std::cout << "Playlist berhasil ditambahkan" << std::endl;
 }
 
 void hapusPlaylist(ListPlaylist& listPlaylist, const std::string& namaPlaylistHapus) {
@@ -70,13 +67,11 @@ void hapusPlaylist(ListPlaylist& listPlaylist, const std::string& namaPlaylistHa
     }
 
     if (current == nullptr) {
-        std::cout << "Playlist tidak ditemukan" << std::endl;
-        return;
+        throw std::string("Playlist tidak ditemukan");
     }
 
     if (current->firstMusik != nullptr) {
-        std::cout << "Playlist tidak dapat dihapus karena masih memiliki relasi musik" << std::endl;
-        return;
+        throw std::string("Playlist tidak dapat dihapus karena masih memiliki relasi musik");
     }
 
     if (previous == nullptr) {
@@ -86,8 +81,6 @@ void hapusPlaylist(ListPlaylist& listPlaylist, const std::string& namaPlaylistHa
     }
 
     delete current;
-
-    std::cout << "Playlist berhasil dihapus" << std::endl;
 }
 
 void tampilkanSemuaPlaylist(const ListPlaylist& listPlaylist) {
@@ -96,16 +89,18 @@ void tampilkanSemuaPlaylist(const ListPlaylist& listPlaylist) {
         return;
     }
 
-    std::cout << "========== DAFTAR PLAYLIST ==========" << std::endl;
+    unsigned int nomor = 1;
 
     NodePlaylist* current = listPlaylist.first;
     while (current != nullptr) {
-        std::cout << "Judul playlist: " << current->playlist.judul << std::endl;
-        std::cout << "Deskripsi playlist: " << current->playlist.deskripsi << std::endl;
-        std::cout << "Frekuensi akses: " << current->playlist.frekuensiAkses << std::endl;
+        std::cout << "----------------------------------" << std::endl;
+        std::cout << "Playlist " << nomor << std::endl;
+        tampilkanPlaylist(current->playlist);
+        std::cout << std::endl;
         tampilkanSemuaPlaylistMusik(listPlaylist, current->playlist.judul);
         std::cout << "----------------------------------" << std::endl;
 
+        nomor++;
         current = current->next;
     }
 }
@@ -145,12 +140,8 @@ bool kosongPlaylistMusik(const ListPlaylist& listPlaylist, const std::string& na
     return current->firstMusik == nullptr;
 }
 
-ListPlaylist cariPlaylistMusik(const ListPlaylist& listPlaylist, Musik* const musik) {
+ListPlaylist cariSemuaPlaylistMusik(const ListPlaylist& listPlaylist, Musik* const musik) {
     ListPlaylist hasil = buatListPlaylist();
-
-    if (musik == nullptr) {
-        return hasil;
-    }
 
     NodePlaylist* currentPlaylist = listPlaylist.first;
     while (currentPlaylist != nullptr) {
@@ -195,26 +186,19 @@ ListPlaylist cariPlaylistMusik(const ListPlaylist& listPlaylist, Musik* const mu
 }
 
 void tambahPlaylistMusik(ListPlaylist& listPlaylist, const std::string& namaPlaylist, Musik* const musik) {
-    if (musik == nullptr) {
-        std::cout << "Data musik tidak valid" << std::endl;
-        return;
-    }
-
     NodePlaylist* currentPlaylist = listPlaylist.first;
     while (currentPlaylist != nullptr && currentPlaylist->playlist.judul != namaPlaylist) {
         currentPlaylist = currentPlaylist->next;
     }
 
     if (currentPlaylist == nullptr) {
-        std::cout << "Playlist tidak ditemukan" << std::endl;
-        return;
+        throw std::string("Playlist tidak ditemukan");
     }
 
     NodeRelasiMusik* currentRelasi = currentPlaylist->firstMusik;
     while (currentRelasi != nullptr) {
         if (currentRelasi->musik == musik) {
-            std::cout << "Musik sudah terdaftar pada playlist tersebut" << std::endl;
-            return;
+            throw std::string("Musik sudah terdaftar pada playlist tersebut sebelumnya");
         }
 
         currentRelasi = currentRelasi->next;
@@ -235,24 +219,16 @@ void tambahPlaylistMusik(ListPlaylist& listPlaylist, const std::string& namaPlay
     
         currentRelasi->next = nodeRelasiBaru;
     }
-
-    std::cout << "Relasi playlist musik berhasil ditambahkan" << std::endl;
 }
 
-void hapusPlaylistMusik(ListPlaylist& listPlaylist, const std::string& namaPlaylist, Musik* const musik) {
-    if (musik == nullptr) {
-        std::cout << "Data musik tidak valid" << std::endl;
-        return;
-    }
-    
+void hapusPlaylistMusik(ListPlaylist& listPlaylist, const std::string& namaPlaylist, Musik* const musik) {    
     NodePlaylist* currentPlaylist = listPlaylist.first;
     while (currentPlaylist != nullptr && currentPlaylist->playlist.judul != namaPlaylist) {
         currentPlaylist = currentPlaylist->next;
     }
     
     if (currentPlaylist == nullptr) {
-        std::cout << "Playlist tidak ditemukan" << std::endl;
-        return;
+        throw std::string("Playlist tidak ditemukan");
     }
     
     NodeRelasiMusik* currentRelasi = currentPlaylist->firstMusik;
@@ -263,8 +239,7 @@ void hapusPlaylistMusik(ListPlaylist& listPlaylist, const std::string& namaPlayl
     }
     
     if (currentRelasi == nullptr) {
-        std::cout << "Musik tidak terdaftar pada playlist tersebut" << std::endl;
-        return;
+        throw std::string("Musik tidak terdaftar pada playlist tersebut");
     }
     
     if (previousRelasi == nullptr) {
@@ -274,8 +249,35 @@ void hapusPlaylistMusik(ListPlaylist& listPlaylist, const std::string& namaPlayl
     }
     
     delete currentRelasi;
-    
-    std::cout << "Relasi playlist musik berhasil dihapus" << std::endl;
+}
+
+void hapusSemuaPlaylistMusik(ListPlaylist& listPlaylist, Musik* const musik) {
+    NodePlaylist* currentPlaylist = listPlaylist.first;
+
+    while (currentPlaylist != nullptr) {
+        NodeRelasiMusik* currentRelasi = currentPlaylist->firstMusik;
+        NodeRelasiMusik* previousRelasi = nullptr;
+
+        while (currentRelasi != nullptr) {
+            if (currentRelasi->musik == musik) {
+                NodeRelasiMusik* hapus = currentRelasi;
+
+                if (previousRelasi == nullptr) {
+                    currentPlaylist->firstMusik = currentRelasi->next;
+                } else {
+                    previousRelasi->next = currentRelasi->next;
+                }
+
+                currentRelasi = currentRelasi->next;
+                delete hapus;
+            } else {
+                previousRelasi = currentRelasi;
+                currentRelasi = currentRelasi->next;
+            }
+        }
+
+        currentPlaylist = currentPlaylist->next;
+    }
 }
 
 void tampilkanSemuaPlaylistMusik(const ListPlaylist& listPlaylist, const std::string& namaPlaylist) {
@@ -294,13 +296,17 @@ void tampilkanSemuaPlaylistMusik(const ListPlaylist& listPlaylist, const std::st
         return;
     }
     
-    std::cout << "Daftar musik:" << std::endl;
+    std::cout << "DAFTAR MUSIK" << std::endl;
 
-    NodeRelasiMusik* currentRelasi = currentPlaylist->firstMusik;
     unsigned int nomor = 1;
+    NodeRelasiMusik* currentRelasi = currentPlaylist->firstMusik;
     while (currentRelasi != nullptr) {
         if (currentRelasi->musik != nullptr) {
-            std::cout << nomor << ". " << currentRelasi->musik->judul << std::endl;
+            std::cout << "----------" << std::endl;
+            std::cout << "Relasi playlist musik " << nomor << std::endl;
+            tampilkanMusik(*currentRelasi->musik);
+            std::cout << "----------" << std::endl;
+
             nomor++;
         }
 
